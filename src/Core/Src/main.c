@@ -29,7 +29,8 @@
 /* USER CODE BEGIN PTD */
 typedef enum {
 	RED_ON,
-	YELLOW_ON
+	YELLOW_ON,
+	GREEN_ON
 } State;
 /* USER CODE END PTD */
 
@@ -98,22 +99,35 @@ int main(void)
   while (1)
   {
 	  switch (led_state) { // Active-low -> reset sang
-	  	  case RED_ON:
+	  	  case RED_ON: // 5s do
 	  		  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET); // Do sang
 	  		  HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_SET); // Vang tat
+	  		  HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_SET); // Xanh tat
 
 	  		  // chuyen trang thai
 	  		  counter++;
-	  		  if (counter >= 2) { // du 2 giay
+	  		  if (counter >= 5) { // du 2 giay
+	  			  counter = 0; // reset bo dem
+	  			  led_state = GREEN_ON;
+	  		  }
+	  		  break;
+
+	  	  case GREEN_ON: // 3s xanh
+	  		  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET); // Do tat
+	  		  HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_SET); // Vang tat
+	  		  HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET); // Xanh sang
+	  		  // chuyen trang thai
+	  		  counter++;
+	  		  if (counter >= 3) { // du 2 giay
 	  			  counter = 0; // reset bo dem
 	  			  led_state = YELLOW_ON;
 	  		  }
 	  		  break;
 
-	  	  case YELLOW_ON:
+	  	  case YELLOW_ON: // 2s vang
 	  		  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET); // Do tat
 	  		  HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET); // Vang sang
-
+	  		  HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_SET); // Xanh tat
 	  		  // chuyen trang thai
 	  		  counter++;
 	  		  if (counter >= 2) { // du 2 giay
@@ -121,6 +135,9 @@ int main(void)
 	  			  led_state = RED_ON;
 	  		  }
 	  		  break;
+
+
+
 	  }
 	  HAL_Delay(1000);
     /* USER CODE END WHILE */
@@ -178,10 +195,10 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, LED_RED_Pin|LED_YELLOW_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, LED_RED_Pin|LED_YELLOW_Pin|LED_GREEN_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : LED_RED_Pin LED_YELLOW_Pin */
-  GPIO_InitStruct.Pin = LED_RED_Pin|LED_YELLOW_Pin;
+  /*Configure GPIO pins : LED_RED_Pin LED_YELLOW_Pin LED_GREEN_Pin */
+  GPIO_InitStruct.Pin = LED_RED_Pin|LED_YELLOW_Pin|LED_GREEN_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
