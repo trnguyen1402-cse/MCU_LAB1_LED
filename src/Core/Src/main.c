@@ -28,10 +28,12 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 typedef enum {
-	RED_ON,
-	YELLOW_ON,
-	GREEN_ON
-} State;
+    INIT,		  // trang thai khoi dong
+    GREEN_RED,    // ngang xanh, doc do
+    YELLOW_RED,   // ngang vang, doc do
+    RED_GREEN,    // ngang do, doc xanh
+    RED_YELLOW    // ngang do, doc vang
+} TrafficState;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -58,8 +60,8 @@ static void MX_GPIO_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-State led_state = RED_ON;
-int counter = 0;
+TrafficState state = INIT;
+int timer = 0; // timer dem xuong
 /* USER CODE END 0 */
 
 /**
@@ -98,46 +100,77 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  switch (led_state) { // Active-low -> reset sang
-	  	  case RED_ON: // 5s do
-	  		  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET); // Do sang
-	  		  HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_SET); // Vang tat
-	  		  HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_SET); // Xanh tat
+	  switch (state) {
+	      case INIT:
+	          // tat toan bo luc khoi dong
+	          HAL_GPIO_WritePin(RED1_GPIO_Port, RED1_Pin, GPIO_PIN_SET);
+	          HAL_GPIO_WritePin(YELLOW1_GPIO_Port, YELLOW1_Pin, GPIO_PIN_SET);
+	          HAL_GPIO_WritePin(GREEN1_GPIO_Port, GREEN1_Pin, GPIO_PIN_SET);
 
-	  		  // chuyen trang thai
-	  		  counter++;
-	  		  if (counter >= 5) { // du 2 giay
-	  			  counter = 0; // reset bo dem
-	  			  led_state = GREEN_ON;
-	  		  }
-	  		  break;
+	          HAL_GPIO_WritePin(RED2_GPIO_Port, RED2_Pin, GPIO_PIN_SET);
+	          HAL_GPIO_WritePin(YELLOW2_GPIO_Port, YELLOW2_Pin, GPIO_PIN_SET);
+	          HAL_GPIO_WritePin(GREEN2_GPIO_Port, GREEN2_Pin, GPIO_PIN_SET);
 
-	  	  case GREEN_ON: // 3s xanh
-	  		  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET); // Do tat
-	  		  HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_SET); // Vang tat
-	  		  HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET); // Xanh sang
-	  		  // chuyen trang thai
-	  		  counter++;
-	  		  if (counter >= 3) { // du 2 giay
-	  			  counter = 0; // reset bo dem
-	  			  led_state = YELLOW_ON;
-	  		  }
-	  		  break;
+	          // chuyen sang trang thai dau tien
+	          state = GREEN_RED;
+	          timer = 3; // Xanh 3s
+	          break;
 
-	  	  case YELLOW_ON: // 2s vang
-	  		  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET); // Do tat
-	  		  HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET); // Vang sang
-	  		  HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_SET); // Xanh tat
-	  		  // chuyen trang thai
-	  		  counter++;
-	  		  if (counter >= 2) { // du 2 giay
-	  			  counter = 0; // reset bo dem
-	  			  led_state = RED_ON;
-	  		  }
-	  		  break;
+	      case GREEN_RED:
+	          HAL_GPIO_WritePin(GREEN1_GPIO_Port, GREEN1_Pin, GPIO_PIN_RESET);
+	          HAL_GPIO_WritePin(RED2_GPIO_Port, RED2_Pin, GPIO_PIN_RESET);
 
+	          HAL_GPIO_WritePin(RED1_GPIO_Port, RED1_Pin, GPIO_PIN_SET);
+	          HAL_GPIO_WritePin(YELLOW1_GPIO_Port, YELLOW1_Pin, GPIO_PIN_SET);
+	          HAL_GPIO_WritePin(GREEN2_GPIO_Port, GREEN2_Pin, GPIO_PIN_SET);
+	          HAL_GPIO_WritePin(YELLOW2_GPIO_Port, YELLOW2_Pin, GPIO_PIN_SET);
 
+	          timer--;
+	          if (timer <= 0) {
+	              state = YELLOW_RED;
+	              timer = 2; // vang 2s
+	          }
+	          break;
 
+	      case YELLOW_RED:
+	    	  // tat xanh bat vang
+	          HAL_GPIO_WritePin(GREEN1_GPIO_Port, GREEN1_Pin, GPIO_PIN_SET);
+	          HAL_GPIO_WritePin(YELLOW1_GPIO_Port, YELLOW1_Pin, GPIO_PIN_RESET);
+
+	          timer--;
+	          if (timer <= 0) {
+	              state = RED_GREEN;
+	              timer = 3; // Xanh 3s
+	          }
+	          break;
+
+	      case RED_GREEN:
+	          // tat vang bat do
+	          HAL_GPIO_WritePin(YELLOW1_GPIO_Port, YELLOW1_Pin, GPIO_PIN_SET);
+	          HAL_GPIO_WritePin(RED1_GPIO_Port, RED1_Pin, GPIO_PIN_RESET);
+
+	          // tat do bat xanh
+	          HAL_GPIO_WritePin(RED2_GPIO_Port, RED2_Pin, GPIO_PIN_SET);
+	          HAL_GPIO_WritePin(GREEN2_GPIO_Port, GREEN2_Pin, GPIO_PIN_RESET);
+
+	          timer--;
+	          if (timer <= 0) {
+	              state = RED_YELLOW;
+	              timer = 2; // vang 2s
+	          }
+	          break;
+
+	      case RED_YELLOW:
+	    	  // tat xanh bat vang
+	          HAL_GPIO_WritePin(GREEN2_GPIO_Port, GREEN2_Pin, GPIO_PIN_SET);
+	          HAL_GPIO_WritePin(YELLOW2_GPIO_Port, YELLOW2_Pin, GPIO_PIN_RESET);
+
+	          timer--;
+	          if (timer <= 0) {
+	              state = GREEN_RED;
+	              timer = 3; // quay lai
+	          }
+	          break;
 	  }
 	  HAL_Delay(1000);
     /* USER CODE END WHILE */
@@ -195,10 +228,13 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, LED_RED_Pin|LED_YELLOW_Pin|LED_GREEN_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, RED1_Pin|YELLOW1_Pin|GREEN1_Pin|RED2_Pin
+                          |YELLOW2_Pin|GREEN2_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : LED_RED_Pin LED_YELLOW_Pin LED_GREEN_Pin */
-  GPIO_InitStruct.Pin = LED_RED_Pin|LED_YELLOW_Pin|LED_GREEN_Pin;
+  /*Configure GPIO pins : RED1_Pin YELLOW1_Pin GREEN1_Pin RED2_Pin
+                           YELLOW2_Pin GREEN2_Pin */
+  GPIO_InitStruct.Pin = RED1_Pin|YELLOW1_Pin|GREEN1_Pin|RED2_Pin
+                          |YELLOW2_Pin|GREEN2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
