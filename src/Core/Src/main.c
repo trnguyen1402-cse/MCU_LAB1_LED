@@ -61,6 +61,11 @@ uint16_t clock_pins[12] = {
     LED4_Pin, LED5_Pin, LED6_Pin, LED7_Pin,
     LED8_Pin, LED9_Pin, LED10_Pin, LED11_Pin
 };
+
+// bien dem thgian
+int hour = 6;
+int minute = 59;
+int second = 0;
 /* USER CODE END 0 */
 
 /**
@@ -100,12 +105,28 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
     {
-	  // vong for test hieu ung
-	  for (int i = 0; i < 12; i++) {
-		  HAL_GPIO_WritePin(GPIOA, clock_pins[i], GPIO_PIN_RESET);
-		  HAL_Delay(500);
-		  HAL_GPIO_WritePin(GPIOA, clock_pins[i], GPIO_PIN_SET);
+	  // HIEN THI LED
+	  clearAllClock(); // xoa trang thai cua giay truoc do
+	  setNumberOnClock(hour); // bat kim gio
+	  setNumberOnClock(minute / 5); // bat kim phut
+	  setNumberOnClock(second / 5); // bat kim gio
+
+	  // CAP NHAT THGIAN
+	  second++;
+	  if(second >= 60) {
+		  second = 0;
+		  minute++;
 	  }
+
+	  if (minute >= 60) {
+		  minute = 0;
+		  hour++;
+	  }
+
+	  if(hour >= 12) {
+		  hour = 0;
+	  }
+	  HAL_Delay(1000);
     /* USER CODE END WHILE */
     /* USER CODE BEGIN 3 */
     }
