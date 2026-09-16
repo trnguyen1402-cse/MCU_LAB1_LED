@@ -51,6 +51,7 @@ static void MX_GPIO_Init(void);
 /* USER CODE BEGIN PFP */
 void clearAllClock(void);
 void setNumberOnClock(int num);
+void clearNumberOnClock(int num);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -189,6 +190,13 @@ void setNumberOnClock(int num) {
 
 	// bat bong tai vi tri num truyen vao
 	HAL_GPIO_WritePin(GPIOA, clock_pins[num], GPIO_PIN_RESET);
+}
+
+void clearNumberOnClock(int num) {
+	num = num % 12; // tranh truyen sai so
+
+	// bat bong tai vi tri num truyen vao
+	HAL_GPIO_WritePin(GPIOA, clock_pins[num], GPIO_PIN_SET);
 }
 /* USER CODE END 4 */
 
