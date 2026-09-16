@@ -49,7 +49,7 @@
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 /* USER CODE BEGIN PFP */
-
+void clearAllClock(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -91,9 +91,7 @@ int main(void)
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
   // tat toan bo den truoc khi chay
-  for (int i = 0; i < 12; i++) {
-      HAL_GPIO_WritePin(GPIOA, clock_pins[i], GPIO_PIN_SET);
-  }
+  clearAllClock();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -179,7 +177,11 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void clearAllClock() {
+	for (int i = 0; i < 12; i++) {
+		HAL_GPIO_WritePin(GPIOA, clock_pins[i], GPIO_PIN_SET);
+	}
+}
 /* USER CODE END 4 */
 
 /**
